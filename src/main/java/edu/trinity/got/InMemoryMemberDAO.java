@@ -2,167 +2,164 @@ package edu.trinity.got;
 
 import java.util.*;
 
+import java.util.*;
+import java.util.stream.Collectors;
+
 public class InMemoryMemberDAO implements MemberDAO {
+
     private final Collection<Member> allMembers =
             MemberDB.getInstance().getAllMembers();
 
+    // Implementation for all methods
+
     @Override
     public Optional<Member> findById(Long id) {
-        return Optional.empty();
+        return allMembers.stream()
+                .filter(m -> m.id().equals(id))
+                .findFirst();
     }
 
     @Override
     public Optional<Member> findByName(String name) {
-        return Optional.empty();
+        return allMembers.stream()
+                .filter(m -> m.name().equals(name))
+                .findFirst();
     }
 
     @Override
     public List<Member> findAllByHouse(House house) {
-        return Collections.emptyList();
+        return allMembers.stream()
+                .filter(m -> m.house() == house)
+                .collect(Collectors.toList());
     }
 
     @Override
     public Collection<Member> getAll() {
-        return Collections.emptyList();
+        return allMembers;
     }
 
-    /**
-     * Find all members whose name starts with S and sort by id (natural sort)
-     */
     @Override
     public List<Member> startWithSandSortAlphabetically() {
-        return Collections.emptyList();
+        return allMembers.stream()
+                .filter(m -> m.name().startsWith("S"))
+                .sorted(Comparator.comparing(Member::name))
+                .collect(Collectors.toList());
     }
 
-    /**
-     * Final all Lannisters and sort them by name
-     */
     @Override
     public List<Member> lannisters_alphabeticallyByName() {
-        return Collections.emptyList();
+        return allMembers.stream()
+                .filter(m -> m.house() == House.LANNISTER)
+                .sorted(Comparator.comparing(Member::name))
+                .collect(Collectors.toList());
     }
 
-    /**
-     * Find all members whose salary is less than the given value and sort by house
-     */
     @Override
     public List<Member> salaryLessThanAndSortByHouse(double max) {
-        return Collections.emptyList();
+        return allMembers.stream()
+                .filter(m -> m.salary() < max)
+                .sorted(Comparator.comparing(Member::house))
+                .collect(Collectors.toList());
     }
 
-    /**
-     * Sort members by House, then by name
-     */
     @Override
     public List<Member> sortByHouseNameThenSortByNameDesc() {
-        return Collections.emptyList();
+        return allMembers.stream()
+                .sorted(Comparator.comparing(Member::house).thenComparing(Member::name).reversed())
+                .collect(Collectors.toList());
     }
 
-    /**
-     * Sort the members of a given House by birthdate
-     */
     @Override
     public List<Member> houseByDob(House house) {
-        return Collections.emptyList();
+        return allMembers.stream()
+                .filter(m -> m.house() == house)
+                .sorted(Comparator.comparing(Member::dob))
+                .collect(Collectors.toList());
     }
 
-    /**
-     * Find all Kings and sort by name in descending order
-     */
     @Override
     public List<Member> kingsByNameDesc() {
-        return Collections.emptyList();
+        return allMembers.stream()
+                .filter(m -> m.title() == Title.KING)
+                .sorted(Comparator.comparing(Member::name).reversed())
+                .collect(Collectors.toList());
     }
 
-    /**
-     * Find the average salary of all the members
-     */
     @Override
     public double averageSalary() {
-        return 0.0;
+        return allMembers.stream()
+                .mapToDouble(Member::salary)
+                .average()
+                .orElse(0);
     }
 
-    /**
-     * Get the names of a given house, sorted in natural order
-     * (note sort by _names_, not members)
-     */
     @Override
     public List<String> namesSorted(House house) {
-        return Collections.emptyList();
+        return allMembers.stream()
+                .filter(m -> m.house() == house)
+                .map(Member::name)
+                .sorted()
+                .collect(Collectors.toList());
     }
 
-    /**
-     * Are any of the salaries greater than 100K?
-     */
     @Override
     public boolean salariesGreaterThan(double max) {
-        return false;
+        return allMembers.stream()
+                .anyMatch(m -> m.salary() > max);
     }
 
-    /**
-     * Are there any members of given house?
-     */
     @Override
     public boolean anyMembers(House house) {
-        return false;
+        return allMembers.stream()
+                .anyMatch(m -> m.house() == house);
     }
 
-    /**
-     * How many members of a given house are there?
-     */
     @Override
     public long howMany(House house) {
-        return 0;
+        return allMembers.stream()
+                .filter(m -> m.house() == house)
+                .count();
     }
 
-    /**
-     * Return the names of a given house as a comma-separated string
-     */
     @Override
     public String houseMemberNames(House house) {
-        return "";
+        return allMembers.stream()
+                .filter(m -> m.house() == house)
+                .map(Member::name)
+                .collect(Collectors.joining(", "));
     }
 
-    /**
-     * Who has the highest salary?
-     */
     @Override
     public Optional<Member> highestSalary() {
-        return Optional.empty();
+        return allMembers.stream()
+                .max(Comparator.comparingDouble(Member::salary));
     }
 
-    /**
-     * Partition members into royalty and non-royalty
-     * (note: royalty are KINGs and QUEENs only)
-     */
     @Override
     public Map<Boolean, List<Member>> royaltyPartition() {
-        return Collections.emptyMap();
+        return allMembers.stream()
+                .collect(Collectors.partitioningBy(m ->
+                        m.title() == Title.KING || m.title() == Title.QUEEN));
     }
 
-    /**
-     * Group members into Houses
-     */
     @Override
     public Map<House, List<Member>> membersByHouse() {
-        return Collections.emptyMap();
+        return allMembers.stream()
+                .collect(Collectors.groupingBy(Member::house));
     }
 
-    /**
-     * How many members are in each house?
-     * (group by house, downstream collector using counting
-     */
     @Override
     public Map<House, Long> numberOfMembersByHouse() {
-        return Collections.emptyMap();
+        return allMembers.stream()
+                .collect(Collectors.groupingBy(Member::house, Collectors.counting()));
     }
 
-    /**
-     * Get the max, min, and ave salary for each house
-     */
     @Override
     public Map<House, DoubleSummaryStatistics> houseStats() {
-        return Collections.emptyMap();
+        return allMembers.stream()
+                .collect(Collectors.groupingBy(
+                        Member::house,
+                        Collectors.summarizingDouble(Member::salary)));
     }
 
 }
